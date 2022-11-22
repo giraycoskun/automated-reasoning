@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "automated-reasoning-api"
+version = "0.1.0"
+description = "Automated Reasoning via Solvers of ASP and SAT"
+authors = ["giraycoskun <giraycoskun@sabanciuniv.edu>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "automated_reasoning_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.87.0"
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.15.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
