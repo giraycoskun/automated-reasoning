@@ -5,7 +5,6 @@ description = "Automated Reasoning via Solvers of ASP and SAT"
 authors = ["giraycoskun <giraycoskun@sabanciuniv.edu>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "automated_reasoning_api"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
