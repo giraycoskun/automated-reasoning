@@ -1,15 +1,21 @@
 [tool.poetry]
-name = "automated-reasoning-api"
+name = "automated-reasoning"
 version = "0.1.0"
-description = "Automated Reasoning via Solvers of ASP and SAT"
-authors = ["giraycoskun <giraycoskun@sabanciuniv.edu>"]
+description = "Automated Reasoning"
+authors = ["Giray Coskun <giraycoskun.dev@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-fastapi = "^0.87.0"
-uvicorn = "^0.20.0"
+python = "^3.12"
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.4.8"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
 
 [build-system]
 requires = ["poetry-core"]

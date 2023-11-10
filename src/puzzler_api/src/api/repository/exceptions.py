@@ -1,0 +1,2 @@
+class RedisRepositoryException(Exception):
+    pass

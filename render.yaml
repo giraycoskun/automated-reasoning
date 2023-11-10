@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: fastapi-poetry
-    env: python
-    plan: starter
-    buildCommand: poetry install
-    startCommand: uvicorn main:app --chdir ./src
-    autoDeploy: false
