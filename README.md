@@ -21,9 +21,13 @@ uvicorn src.app:app --reload
 
 ## References
 
-## Thanks to
+## To-Dos
 
-- <https://gitlab.com/gerbenoostra/poetry-monorepo>
+- Problems
+  - [x] sudoku (puzzle)
+  - [ ] hashi (puzz;e)
+  - [ ] maze-cover (puzzle)
+  - [ ] balsort
 
 ---
 

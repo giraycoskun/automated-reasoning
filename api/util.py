@@ -1,6 +1,7 @@
 from loguru import logger
 import sys
 from pathlib import Path
+from uuid import uuid4
 
 from api.config import LOG_LEVEL, LOG_FILE, LOG_ROTATION, LOG_RETENTION
 
@@ -38,3 +39,12 @@ def setup_logging():
     )
 
     logger.info("Logging is set up. Logs will be written to stdout and %s", LOG_FILE)
+
+
+def generate_problem_id() -> str:
+    """Generate a unique puzzle identifier using UUID4.
+    
+    Returns:
+        str: A unique UUID4 string without hyphens.
+    """
+    return str(uuid4()).replace("-", "")
