@@ -1,21 +1,23 @@
-"""
-Compatibility shim: re-export settings from src.config so legacy imports continue working.
-Prefer importing from src.config directly in new code.
-"""
+# api/config.py
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-from solver.config import settings
+ENVIRONMENT = "dev"
 
-# Legacy aliases for backward compatibility
-ENVIRONMENT = settings.environment
-SOLVER_WORKER_SIZE = settings.solver_worker_size
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
+LOG_FILE = os.getenv("LOG_FILE", "logs/app.log")
+LOG_RETENTION = os.getenv("LOG_RETENTION", "7 days")
+LOG_ROTATION = os.getenv("LOG_ROTATION", "10 MB")
 
-RABBITMQ_HOST = settings.rabbitmq_host
-RABBITMQ_PORT = settings.rabbitmq_port
-RABBITMQ_USER = settings.rabbitmq_user
-RABBITMQ_PASSWORD = settings.rabbitmq_password
-RABBITMQ_POOL_SIZE = settings.rabbitmq_pool_size
-RABBITMQ_PUZZLE_QUEUE_NAME = settings.rabbitmq_puzzle_queue_name
-RABBITMQ_RESULT_QUEUE_NAME = settings.rabbitmq_result_queue_name
 
-REDIS_HOST = settings.redis_host
-REDIS_PORT = settings.redis_port
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+RABBITMQ_PORT = os.getenv("RABBITMQ_PORT", "5672")
+RABBITMQ_USER = os.getenv("RABBITMQ_USER", "dev")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "dev")
+RABBITMQ_POOL_SIZE = os.getenv("RABBITMQ_POOL_SIZE", "10")
+RABBITMQ_PUZZLE_QUEUE_NAME = os.getenv("RABBITMQ_PUZZLE_QUEUE_NAME", "puzzle_queue")
+RABBITMQ_RESULT_QUEUE_NAME = os.getenv("RABBITMQ_RESULT_QUEUE_NAME", "result_queue")
+
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")

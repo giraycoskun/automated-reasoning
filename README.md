@@ -1,12 +1,11 @@
 # Automated Reasoning
 
-A reasoing api
+A reasoning api
 
 ## Features
 
 - Monorepo
-- Dependency management via poetry
-- Microservices architecture via gRPC
+- Dependency management via uv
 - Dockerized services
 - API Gateway
 

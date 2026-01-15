@@ -2,14 +2,14 @@
 
 ## Architecture Overview
 
-This is a **distributed puzzle solver** with two microservices:
-- **API Service** ([src/api/](../src/api/)): FastAPI REST API that accepts puzzle submissions, stores them in Redis, and publishes to RabbitMQ
-- **Solver Service** ([src/solver/](../src/solver/)): Multi-process consumer that pulls puzzles from RabbitMQ, solves them using CSP/search algorithms, and publishes results back
+    This is a **distributed automated reasoning service** with two microservices:
+    - **API Service** ([src/api/](../src/api/)): FastAPI REST API that accepts problem submissions, stores them in Redis, and publishes to RabbitMQ
+    - **Solver Service** ([src/solver/](../src/solver/)): Multi-process consumer that pulls problems from RabbitMQ, solves them using CSP/search algorithms, and publishes results back
 
 ### Data Flow
-1. Client POSTs puzzle → API creates record in Redis (status: CREATED) → Publishes to `puzzle-jobs` queue
-2. Solver workers consume from `puzzle-jobs` → Update Redis (IN_PROGRESS) → Solve → Publish to `puzzle-results`
-3. API consumes `puzzle-results` in background thread → Updates Redis → Streams results via SSE to subscribed clients
+1. Client POSTs problem → API creates record in Redis (status: CREATED) → Publishes to `problem-jobs` queue
+2. Solver workers consume from `problem-jobs` → Update Redis (IN_PROGRESS) → Solve → Publish to `problem-results`
+3. API consumes `problem-results` in background thread → Updates Redis → Streams results via SSE to subscribed clients
 
 ## Key Patterns
 
