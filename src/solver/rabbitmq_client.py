@@ -2,7 +2,7 @@ import pika
 from loguru import logger
 from abc import ABC, abstractmethod
 
-from src.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_PUZZLE_QUEUE_NAME, RABBITMQ_RESULT_QUEUE_NAME
+from src.config import settings
 
 # Reference: 
 # https://pika.readthedocs.io/en/stable/examples/asynchronous_consumer_example.html
@@ -16,9 +16,9 @@ class RabbitMQClient(ABC):
     def __init__(self, queue) -> None:
         self.queue = queue
         self.parameters = pika.ConnectionParameters(
-            host=RABBITMQ_HOST,
-            port=RABBITMQ_PORT,
-            credentials=pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD),
+            host=settings.rabbitmq_host,
+            port=settings.rabbitmq_port,
+            credentials=pika.PlainCredentials(settings.rabbitmq_user, settings.rabbitmq_password),
             socket_timeout=None
         )
 
@@ -60,10 +60,10 @@ class RabbitMQConsumerClient(RabbitMQClient):
     def on_channel_open(self, channel):
         self.channel = channel
         channel.basic_qos(prefetch_count=1)
-        channel.queue_declare(RABBITMQ_PUZZLE_QUEUE_NAME, durable=True, callback=self.on_queue_declared)
+        channel.queue_declare(settings.rabbitmq_puzzle_queue_name, durable=True, callback=self.on_queue_declared)
 
     def on_queue_declared(self, frame):
-        self.channel.basic_consume(RABBITMQ_PUZZLE_QUEUE_NAME, self.on_message, auto_ack=True)
+        self.channel.basic_consume(settings.rabbitmq_puzzle_queue_name, self.on_message, auto_ack=True)
 
     def on_message(self, channel, method, properties, body):
         logger.info("ch: {ch}", ch=channel)
@@ -83,11 +83,11 @@ class RabbitMQProducerClient(RabbitMQClient):
 
     def on_channel_open(self, channel):
         self.channel = channel
-        channel.queue_declare(RABBITMQ_RESULT_QUEUE_NAME, durable=True, callback=self.__on_queue_declared)
+        channel.queue_declare(settings.rabbitmq_result_queue_name, durable=True, callback=self.__on_queue_declared)
     
     def __on_queue_declared(self, frame):
         logger.debug("Frame: {frame}", frame=frame)
-        logger.info("Queue {queue} declared", queue=RABBITMQ_RESULT_QUEUE_NAME)
+        logger.info("Queue {queue} declared", queue=settings.rabbitmq_result_queue_name)
         # self.channel.basic_publish(body="Hello World", exchange='', routing_key=RABBITMQ_RESULT_QUEUE_NAME)
 
 if __name__ == "__main__":
