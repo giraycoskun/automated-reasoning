@@ -3,7 +3,7 @@ Compatibility shim: re-export settings from src.config so legacy imports continu
 Prefer importing from src.config directly in new code.
 """
 
-from src.config import settings
+from solver.config import settings
 
 # Legacy aliases for backward compatibility
 ENVIRONMENT = settings.environment

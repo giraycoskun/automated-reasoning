@@ -1,8 +1,8 @@
 import redis.asyncio as redis
 from loguru import logger
 
-from src.api.repository.exceptions import RedisRepositoryException
-from src.config import settings
+from api.repository.exceptions import RedisRepositoryException
+from solver.config import settings
 
 
 class RedisRepository:

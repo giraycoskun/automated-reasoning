@@ -2,7 +2,7 @@ import pika
 from loguru import logger
 from abc import ABC, abstractmethod
 
-from src.config import settings
+from solver.config import settings
 
 # Reference: 
 # https://pika.readthedocs.io/en/stable/examples/asynchronous_consumer_example.html

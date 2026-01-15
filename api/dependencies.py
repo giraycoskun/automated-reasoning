@@ -1,6 +1,6 @@
-from src.api.events.result_stream import ResultStreamer
-from src.api.repository.rabbitmq_repository import RabbitMQRepository
-from src.api.repository.redis_repository import RedisRepository
+from api.events.result_stream import ResultStreamer
+from api.repository.rabbitmq_repository import RabbitMQRepository
+from api.repository.redis_repository import RedisRepository
 
 # Singleton-like instances shared across the API service lifecycle.
 rabbitmq_repository = RabbitMQRepository()

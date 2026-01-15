@@ -1,6 +1,6 @@
 import redis
 
-from src.config import settings
+from solver.config import settings
 
 
 class RedisClient:

@@ -5,7 +5,7 @@ from typing import Callable
 import pika
 from loguru import logger
 
-from src.config import settings
+from solver.config import settings
 
 
 class RabbitMQRepository:

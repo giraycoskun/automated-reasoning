@@ -1,0 +1,25 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.2.2-management
+    container_name: rabbitmq-dev
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: dev
+      RABBITMQ_DEFAULT_PASS: dev
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  
+  redis:
+    image: redis:8.4.0
+    container_name: redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  rabbitmq_data:
+  redis_data:

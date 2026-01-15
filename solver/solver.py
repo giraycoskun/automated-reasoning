@@ -6,7 +6,7 @@ import pika
 from loguru import logger
 
 from src.api.repository.models import PuzzleStatus
-from src.config import settings
+from solver.config import settings
 from src.solver.redis_client import RedisClient
 
 

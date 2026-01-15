@@ -5,15 +5,15 @@ from threading import Thread
 from fastapi import FastAPI
 from loguru import logger
 
-from src.api.dependencies import (
+from api.dependencies import (
     get_result_streamer,
     rabbitmq_repository,
     redis_repository,
 )
-from src.api.events.result_stream import ResultStreamer
-from src.api.repository.models import PuzzleStatus, ResultQueueMessage
-from src.api.routes import auth, puzzle, status, subscription, user
-from src.config import settings
+from api.events.result_stream import ResultStreamer
+from api.repository.models import ResultQueueMessage
+from api.routes import auth, puzzle, status, subscription, user
+from solver.config import settings
 
 logger.info("ENVIRONMENT: {env}", env=settings.environment)
 
