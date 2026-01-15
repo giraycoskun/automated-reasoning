@@ -6,7 +6,7 @@ from typing import Optional
 from loguru import logger
 from clients.config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_PROBLEMS_QUEUE_NAME, RABBITMQ_USERNAME, RABBITMQ_PASSWORD
 from clients.schemas.problems import Problem
-from clients.redis_client import _serialize_problem
+from clients.util import _serialize_problem
 
 connection: Optional[aio_pika.RobustConnection] = None
 channel: Optional[aio_pika.RobustChannel] = None

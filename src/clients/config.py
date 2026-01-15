@@ -1,6 +1,10 @@
+# api/config.py
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
 import os
 load_dotenv()
+
+TIMEZONE= ZoneInfo(os.getenv("TIMEZONE", "Europe/Berlin"))
 
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT", "5672")

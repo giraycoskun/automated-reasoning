@@ -4,6 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from api.config import LOG_LEVEL, LOG_FILE, LOG_ROTATION, LOG_RETENTION
+from clients.redis_client import check_id_exists
 
 def setup_logging():
     """
@@ -41,10 +42,13 @@ def setup_logging():
     logger.info("Logging is set up. Logs will be written to stdout and %s", LOG_FILE)
 
 
-def generate_problem_id() -> str:
+async def generate_problem_id() -> str:
     """Generate a unique puzzle identifier using UUID4.
     
     Returns:
         str: A unique UUID4 string without hyphens.
     """
-    return str(uuid4()).replace("-", "")
+    while True:
+        new_id = str(uuid4()).replace("-", "")
+        if not await check_id_exists(new_id):
+            return new_id

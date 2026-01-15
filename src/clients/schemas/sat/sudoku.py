@@ -5,9 +5,7 @@ like Sudoku that are used to represent puzzle instances in the system.
 """
 
 from dataclasses import dataclass
-
-from clients.schemas.problems import ProblemType, Problem
-
+from clients.schemas.problems import Problem, ProblemType
 
 @dataclass(kw_only=True)
 class Sudoku(Problem):
@@ -58,9 +56,11 @@ class Sudoku(Problem):
         return problem_str
 
 
+
 if __name__ == "__main__":
     # Example Sudoku instance
     example_sudoku: Sudoku = Sudoku(
+        problem_id="sudoku-001",
         grid=[
             "530070000",
             "600195000",

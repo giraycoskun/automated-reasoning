@@ -76,3 +76,17 @@ async def load_problem_redis(problem_id: str) -> Problem | None:
     if blob is None:
         return None
     return _deserialize_problem(blob)
+
+async def check_id_exists(problem_id: str) -> bool:
+    """Check if a problem ID exists in Redis.
+
+    Args:
+        problem_id: The UUID key to check.
+    Returns:
+        bool: True if the ID exists, False otherwise.
+    """
+    global redis
+    if redis is None:
+        raise RuntimeError("Redis is not initialized. Call init_redis() first.")
+    exists = await redis.exists(problem_id)
+    return exists == 1

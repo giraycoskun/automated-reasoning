@@ -3,6 +3,7 @@ from fastapi import APIRouter, status
 from api.schemas.sudoku import SudokuCreateRequest
 from api.service.problems_service import save_problem
 from clients.schemas.sat.sudoku import Sudoku
+from api.util import generate_problem_id
 
 sat_router = APIRouter(prefix="/sat")
 
@@ -26,6 +27,7 @@ sat_router = APIRouter(prefix="/sat")
 async def post_sudoku(sudoku_data: SudokuCreateRequest):
     """Create and submit a new Sudoku puzzle."""
     sudoku: Sudoku = Sudoku(
+        problem_id=await generate_problem_id(),
         grid=sudoku_data.grid,
     )
     await save_problem(sudoku)

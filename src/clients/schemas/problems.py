@@ -11,8 +11,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from api.config import TIMEZONE
-from api.util import generate_problem_id
+from clients.config import TIMEZONE
 
 
 class ProblemType(str, Enum):
@@ -51,13 +50,13 @@ class Problem(ABC):
         solution_time: Time taken to solve the problem in seconds.
         error_message: Error message if problem solving failed.
     """
-
+    problem_id: str
     problem_type: ProblemType
     problem_name: str
     problem_class: str = __name__
 
     problem_data: dict = field(default_factory=dict)
-    problem_id: str = field(default_factory=generate_problem_id)
+    
     created_at: datetime = field(default_factory=lambda: datetime.now(TIMEZONE))
     status: ProblemStatus = field(default=ProblemStatus.CREATED)
 
