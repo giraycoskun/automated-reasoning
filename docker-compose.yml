@@ -1,32 +1,8 @@
-services:
-  app:
-    build: .
-    container_name: app-dev
-    ports:
-      - "3000:3000"
-    networks:
-      - automated-reasoning-network
-    mem_limit: 512m
-    cpus: 1.0
-    depends_on:
-      - rabbitmq
-      - redis
-    environment:
-      - .env
-  rabbitmq:
-    image: rabbitmq:4.2.2-management
-    container_name: rabbitmq-dev
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: dev
-      RABBITMQ_DEFAULT_PASS: dev
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+version: '3.8'
 
+services:
   redis:
-    image: redis:8.4.0
+    image: redis:7-alpine
     container_name: redis-dev
     ports:
       - "6379:6379"
@@ -35,11 +11,76 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq-dev
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - automated-reasoning-network
+    env_file: .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: api-dev
+    ports:
+      - "8000:8000"
+    networks:
+      - automated-reasoning-network
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+
+  solver:
+    build:
+      context: .
+      dockerfile: Dockerfile.solver
+    container_name: solver-dev
+    networks:
+      - automated-reasoning-network
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    volumes:
+      - ./src:/app/src
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 2.0
 
 volumes:
-  rabbitmq_data:
   redis_data:
+  rabbitmq_data:
 
 networks:
   automated-reasoning-network:
     driver: bridge
+

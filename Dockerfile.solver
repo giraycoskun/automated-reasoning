@@ -1,4 +1,4 @@
-# Multi-service Dockerfile for API and Solver services
+# Dockerfile for Solver service
 FROM python:3.13-slim
 
 # Install system dependencies and uv
@@ -19,14 +19,13 @@ WORKDIR /app
 # Copy project files
 COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
-COPY scripts/ ./scripts/
 
 # Sync dependencies
 RUN uv sync --frozen
 
-# Copy entrypoint script
-RUN chmod +x /app/scripts/entrypoint.sh
+# Configuration
+ENV SOLVER_WORKER_SIZE=1 \
+    LOG_LEVEL=INFO
 
-EXPOSE 8000
-
-ENTRYPOINT ["/app/scripts/entrypoint.sh"]
+# Run solver service (infinite loop, no health check needed)
+CMD ["/root/.local/bin/uv", "run", "python", "-m", "src.solver.main"]
