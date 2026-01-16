@@ -19,6 +19,11 @@ A reasoning api
 uvicorn src.app:app --reload
 ```
 
+## Serve Documentation
+```shell
+PYTHONPATH=./src uv run mkdocs serve
+```
+
 ## References
 
 ## To-Dos

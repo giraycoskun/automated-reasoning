@@ -1,4 +1,4 @@
-from clients.rabbitmg_client import init_rabbitmq, close_rabbitmq
+from clients.rabbitmq_client import init_rabbitmq, close_rabbitmq
 from clients.redis_client import init_redis, close_redis
 from clients.rabbitmq_sync_client import (
     create_rabbitmq_connection,

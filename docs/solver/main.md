@@ -1,0 +1,3 @@
+# Solver Reference
+
+::: solver.main

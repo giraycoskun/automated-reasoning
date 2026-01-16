@@ -85,4 +85,11 @@ nav:
       - Configuration: getting-started/configuration.md
       - Usage: getting-started/usage.md
   - API Reference:
-    - App: api/app.md
+    - API: 
+      - api/app.md
+    - SOLVER:
+      - solver/main.md
+      - solver/worker.md
+    - CLIENTS:
+      - clients/redis_client.md
+      - clients/rabbitmq_client.md

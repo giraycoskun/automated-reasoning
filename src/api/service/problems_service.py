@@ -1,4 +1,4 @@
-from  clients.rabbitmg_client import enqueue_problem
+from  clients.rabbitmq_client import enqueue_problem
 from clients.redis_client import load_problem_redis, save_problem_redis
 from clients.schemas.problems import Problem, ProblemStatus
 
