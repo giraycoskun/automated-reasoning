@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any
 
 from clients.schemas.problems import Problem
-from clients.schemas.sat.sudoku import Sudoku
+from clients.schemas.sudoku import Sudoku
 
 
 def _msgpack_default(obj: Any) -> Any:

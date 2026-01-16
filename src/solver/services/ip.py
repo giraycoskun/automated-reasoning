@@ -1,16 +1,16 @@
 # solver_service/solvers/ip_solver.py
 """Integer Programming solver using PuLP or OR-Tools."""
 
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from loguru import logger
-
-from clients.schemas.problems import Problem
-from solver.services.base import BaseSolver
-
 from ortools.linear_solver import pywraplp
 
+from clients.schemas.problems import ProblemStatus
+from solver.models.ip import IPProblem
+from clients.schemas.solutions import Solution
 
-class IPSolver(BaseSolver):
+
+class IPSolverService:
     """
     Solver for Integer Programming (IP) and Mixed Integer Programming (MIP) problems.
 
@@ -30,7 +30,7 @@ class IPSolver(BaseSolver):
         self.backend = solver_backend
         logger.info(f"IP Solver initialized with backend: {self.backend}")
 
-    def solve(self, problem: Problem) -> Optional[Dict[str, Any]]:
+    def solve(self, problem: IPProblem) -> Solution:
         """
         Solve an IP/MIP problem.
 
@@ -56,17 +56,22 @@ class IPSolver(BaseSolver):
             }
         }
         """
-        if not self.validate_problem(problem):
-            return {"status": "error", "error": "Invalid problem data"}
 
         try:
             result = self._solve_with_ortools(problem.problem_data)
-            return result
+            return Solution(
+                problem_id=problem.problem_id,
+                solution_data=result,
+                status=ProblemStatus.SOLVED if result.get("isSolved") else ProblemStatus.UNSOLVABLE,
+            )
 
         except Exception as e:
             logger.error(f"Error solving IP: {e}")
-            return {"status": "error", "error": str(e)}
-
+            return Solution(
+                problem_id=problem.problem_id,
+                solution_data={"error": str(e)},
+                status=ProblemStatus.FAILED,
+            )
     # def _solve_with_pulp(self, problem_data: Dict[str, Any]) -> Dict[str, Any]:
     #     """Solve using PuLP."""
     #     if not PULP_AVAILABLE:
@@ -181,8 +186,15 @@ class IPSolver(BaseSolver):
             objective_data = problem_data["objective"]
             objective = solver.Objective()
 
-            for var_name, coef in objective_data["coefficients"].items():
-                objective.SetCoefficient(variables[var_name], coef)
+            # BUG FIX #1: Handle empty objective coefficients
+            if objective_data["coefficients"]:
+                for var_name, coef in objective_data["coefficients"].items():
+                    if var_name in variables:  # BUG FIX #2: Check variable exists
+                        objective.SetCoefficient(variables[var_name], coef)
+            else:
+                # For feasibility problems with no objective, set a dummy constant
+                # OR-Tools requires at least something in the objective
+                pass  # Empty objective is actually fine in OR-Tools
 
             if objective_data["sense"] == "minimize":
                 objective.SetMinimization()
@@ -191,35 +203,98 @@ class IPSolver(BaseSolver):
 
             # Add constraints
             for i, constraint in enumerate(problem_data["constraints"]):
-                ct = solver.Constraint(
-                    -infinity if constraint["sense"] != ">=" else constraint["rhs"],
-                    infinity if constraint["sense"] != "<=" else constraint["rhs"],
-                    f"constraint_{i}",
-                )
+                sense = constraint["sense"]
+                rhs = constraint["rhs"]
+                
+                # BUG FIX #3: Correct constraint bounds for each sense
+                if sense == "==":
+                    # Equality: lb = ub = rhs
+                    ct = solver.Constraint(rhs, rhs, f"constraint_{i}")
+                elif sense == "<=":
+                    # Less than or equal: -infinity <= expr <= rhs
+                    ct = solver.Constraint(-infinity, rhs, f"constraint_{i}")
+                elif sense == ">=":
+                    # Greater than or equal: rhs <= expr <= infinity
+                    ct = solver.Constraint(rhs, infinity, f"constraint_{i}")
+                else:
+                    logger.warning(f"Unknown constraint sense: {sense}")
+                    continue
 
                 for var_name, coef in constraint["coefficients"].items():
-                    ct.SetCoefficient(variables[var_name], coef)
+                    if var_name in variables:  # BUG FIX #4: Check variable exists
+                        ct.SetCoefficient(variables[var_name], coef)
+                    else:
+                        logger.warning(f"Variable {var_name} not found in variables")
+
+            # BUG FIX #5: Set time limit to prevent infinite solving
+            solver.SetTimeLimit(300000)  # 5 minutes in milliseconds
 
             # Solve
             status = solver.Solve()
 
+            # Collect statistics
+            statistics = {
+                "wall_time_ms": solver.WallTime(),
+                "iterations": solver.iterations(),
+                "nodes": solver.nodes(),
+            }
+
             if status == pywraplp.Solver.OPTIMAL:
                 solution = {
-                    var_name: var.solution_value()
-                    for var_name, var in variables.items()
-                }
-                return {
-                    "status": "solved",
+                    "variables": {
+                        var_name: var.solution_value()
+                        for var_name, var in variables.items()
+                    },
                     "objective_value": solver.Objective().Value(),
-                    "solution": solution,
+                    "statistics": statistics,
+                    "status": "optimal",
+                    "isSolved": True,
                 }
+                return solution
+            elif status == pywraplp.Solver.FEASIBLE:
+                # BUG FIX #6: Handle FEASIBLE status (non-optimal but valid solution)
+                solution = {
+                    "variables": {
+                        var_name: var.solution_value()
+                        for var_name, var in variables.items()
+                    },
+                    "objective_value": solver.Objective().Value(),
+                    "statistics": statistics,
+                    "status": "feasible",
+                    "isSolved": True,
+                }
+                return solution
             elif status == pywraplp.Solver.INFEASIBLE:
-                return {"status": "unsolvable", "reason": "infeasible"}
+                return {
+                    "status": "unsolvable",
+                    "reason": "infeasible",
+                    "statistics": statistics,
+                    "isSolved": False,
+                }
             elif status == pywraplp.Solver.UNBOUNDED:
-                return {"status": "unsolvable", "reason": "unbounded"}
+                return {
+                    "status": "unsolvable",
+                    "reason": "unbounded",
+                    "statistics": statistics,
+                    "isSolved": False,
+                }
+            elif status == pywraplp.Solver.NOT_SOLVED:
+                return {
+                    "status": "error",
+                    "error": "Solver did not solve (possibly timeout or other issue)",
+                    "statistics": statistics,
+                    "isSolved": False,
+                }
             else:
-                return {"status": "error", "error": "Solver failed"}
+                return {
+                    "status": "error",
+                    "error": f"Unknown solver status: {status}",
+                    "statistics": statistics,
+                    "isSolved": False,
+                }
 
         except Exception as e:
             logger.error(f"OR-Tools solver error: {e}")
-            return {"status": "error", "error": str(e)}
+            import traceback
+            logger.error(traceback.format_exc())
+            return {"status": "error", "error": str(e), "isSolved": False}

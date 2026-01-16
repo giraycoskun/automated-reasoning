@@ -1,14 +1,11 @@
 from fastapi import APIRouter, status
 
 from api.schemas.sudoku import SudokuCreateRequest
-from api.service.problems_service import save_problem
-from clients.schemas.sat.sudoku import Sudoku
-from api.util import generate_problem_id
+from api.service.problems_service_ip import create_sudoku_ip_problem
 
-sat_router = APIRouter(prefix="/sat")
+ip_router = APIRouter(prefix="/ip")
 
-
-@sat_router.post(
+@ip_router.post(
     "/sudoku",
     status_code=status.HTTP_201_CREATED,
     responses={
@@ -24,14 +21,10 @@ sat_router = APIRouter(prefix="/sat")
         }
     },
 )
-async def post_sudoku(sudoku_data: SudokuCreateRequest):
-    """Create and submit a new Sudoku puzzle."""
-    sudoku: Sudoku = Sudoku(
-        problem_id=await generate_problem_id(),
-        grid=sudoku_data.grid,
-    )
-    await save_problem(sudoku)
 
+async def post_sudoku(request: SudokuCreateRequest):
+    """Create and submit a new Sudoku puzzle."""
+    problem_id = await create_sudoku_ip_problem(request.grid)
     return {
-        "task_id": sudoku.problem_id,
+        "task_id": problem_id,
     }

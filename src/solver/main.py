@@ -1,18 +1,17 @@
 # solver_service/main.py
-"""Multi-process solver service that consumes problems from RabbitMQ and writes solutions to Redis."""
+"""Multi-process solver service - main dispatches worker subprocesses that consume from queue."""
 
-import asyncio
 import signal
 import multiprocessing
 from typing import List
 from loguru import logger
 
-from solver_service.worker import Worker
-from solver.config import SOLVER_NUM_WORKERS, SOLVER_THREADS_PER_WORKER
+from solver.worker import Worker
+from solver.config import SOLVER_NUM_WORKERS
 
 
 class SolverService:
-    """Main solver service orchestrator."""
+    """Main service that spawns independent worker subprocesses."""
     
     def __init__(self, num_workers: int = SOLVER_NUM_WORKERS):
         self.num_workers = num_workers
@@ -36,8 +35,7 @@ class SolverService:
         for worker_id in range(self.num_workers):
             worker = Worker(
                 worker_id=worker_id,
-                shutdown_event=self.shutdown_event,
-                threads_per_worker=SOLVER_THREADS_PER_WORKER
+                shutdown_event=self.shutdown_event
             )
             process = multiprocessing.Process(
                 target=worker.run,

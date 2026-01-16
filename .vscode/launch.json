@@ -11,14 +11,14 @@
       "program": "${file}",
       "console": "integratedTerminal",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}"
+        "PYTHONPATH": "${workspaceFolder}/src"
       }
     },
     {
       "name": "Python: Solver",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/solver/solver.py",
+      "program": "${workspaceFolder}/src/solver/main.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/src",
       "env": {

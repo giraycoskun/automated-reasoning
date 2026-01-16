@@ -3,11 +3,11 @@ from fastapi.responses import PlainTextResponse
 
 from clients.schemas.problems import Problem
 from api.service.problems_service import get_problem
-from api.routes.sat_routes import sat_router
+from api.routes.ip_routes import ip_router
 
 problems_router = APIRouter(prefix="/problems", tags=["problems"])
 
-problems_router.include_router(sat_router)
+problems_router.include_router(ip_router)
 
 
 @problems_router.get("/{problem_id}")

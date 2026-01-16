@@ -30,8 +30,17 @@ class ProblemStatus(str, Enum):
     IN_QUEUE = "IN_QUEUE"
     SOLVED = "SOLVED"
     UNSOLVABLE = "UNSOLVABLE"
+    UNSUPPORTED = "UNSUPPORTED"
     FAILED = "FAILED"
 
+class ProblemName(str, Enum):
+    """Enumeration of supported problem names."""
+
+    BASE = "base"
+    SUDOKU = "sudoku"
+    N_QUEENS = "n_queens"
+    GRAPH_COLORING = "graph_coloring"
+    KNAPSACK = "knapsack"
 
 @dataclass(kw_only=True)
 class Problem(ABC):
@@ -52,7 +61,7 @@ class Problem(ABC):
     """
     problem_id: str
     problem_type: ProblemType
-    problem_name: str
+    problem_name: ProblemName
     problem_class: str = __name__
 
     problem_data: dict = field(default_factory=dict)
@@ -60,7 +69,7 @@ class Problem(ABC):
     created_at: datetime = field(default_factory=lambda: datetime.now(TIMEZONE))
     status: ProblemStatus = field(default=ProblemStatus.CREATED)
 
-    solution: Optional[str] = None
+    solution: Optional[dict] = None
     solution_time: Optional[float] = None
     error_message: Optional[str] = None
 
