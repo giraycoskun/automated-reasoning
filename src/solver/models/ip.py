@@ -1,7 +1,7 @@
 """Integer Programming problem model."""
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, Mapping
+from dataclasses import dataclass
+from typing import Any, Mapping
 
 from clients.schemas.problems import ProblemType
 from solver.models.base import BaseProblemModel
@@ -50,7 +50,6 @@ class IPProblem(BaseProblemModel):
     """Represents an IP/MIP problem in the solver domain."""
 
     problem_type: ProblemType = ProblemType.IP
-    problem_data: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         super().__post_init__()

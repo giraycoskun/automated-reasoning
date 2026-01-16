@@ -1,11 +1,13 @@
 # solver_service/solvers/ip_solver.py
 """Integer Programming solver using PuLP or OR-Tools."""
 
+from dataclasses import asdict
 from typing import Dict, Any
 from loguru import logger
 from ortools.linear_solver import pywraplp
 
 from clients.schemas.problems import ProblemStatus
+from solver.models.base import BaseProblemModel
 from solver.models.ip import IPProblem
 from clients.schemas.solutions import Solution
 
@@ -30,7 +32,7 @@ class IPSolverService:
         self.backend = solver_backend
         logger.info(f"IP Solver initialized with backend: {self.backend}")
 
-    def solve(self, problem: IPProblem) -> Solution:
+    def solve(self, problem: BaseProblemModel) -> Solution:
         """
         Solve an IP/MIP problem.
 
@@ -56,6 +58,8 @@ class IPSolverService:
             }
         }
         """
+
+        problem = IPProblem(**asdict(problem))
 
         try:
             result = self._solve_with_ortools(problem.problem_data)

@@ -1,17 +1,18 @@
 """Problem domain models for the solver service."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from clients.schemas.problems import ProblemName, ProblemType
+from clients.schemas.problems import Problem, ProblemName, ProblemType
 
 @dataclass(kw_only=True)
 class BaseProblemModel:
     """Lightweight base model shared by solver components."""
 
-    problem_id: str
+    problem_id: str = ""
     problem_name: ProblemName
-    problem_type: ProblemType
-
+    problem_type: ProblemType = ProblemType.BASE
+    problem: Problem
+    problem_data: dict = field(default_factory=dict)
     
     def __post_init__(self) -> None:
         if not self.problem_id:

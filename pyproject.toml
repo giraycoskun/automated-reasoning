@@ -21,6 +21,8 @@ dependencies = [
 	"aio-pika>=9.5.8",
 	"msgpack>=1.1.2",
 	"ortools>=9.15.6755",
+	"pysat>=3.2.2",
+	"python-sat[aiger,pblib]>=1.8.dev26",
 ]
 
 [dependency-groups]

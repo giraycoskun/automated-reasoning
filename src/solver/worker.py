@@ -9,8 +9,10 @@ from loguru import logger
 
 from clients.schemas.problems import ProblemName, ProblemStatus, ProblemType
 from clients.schemas.solutions import Solution
+from solver.models.sat import SATProblemModel
 from solver.models.sudoku import SudokuProblemModel
 from solver.services.ip import IPSolverService
+from solver.services.sat import SATSolverService
 
 if TYPE_CHECKING:
     import pika.adapters.blocking_connection
@@ -36,6 +38,13 @@ ProblemModelMap = {
             # Add other IP problem models here
         },
         "solver": IPSolverService,
+    },
+    ProblemType.SAT: {
+        "model": {
+            # Add SAT problem models here
+            ProblemName.SUDOKU: SudokuProblemModel,
+        },
+        "solver": SATSolverService,  # Replace with actual SAT solver service
     },
     # Add other problem types and their models here
 }

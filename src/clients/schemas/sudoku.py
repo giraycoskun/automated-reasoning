@@ -7,6 +7,7 @@ like Sudoku that are used to represent puzzle instances in the system.
 from dataclasses import dataclass
 from clients.schemas.problems import Problem, ProblemType, ProblemName
 
+
 @dataclass(kw_only=True)
 class Sudoku(Problem):
     """Sudoku puzzle representation.
@@ -48,15 +49,17 @@ class Sudoku(Problem):
                 problem_str += "\n------|-------|------\n"
             else:
                 problem_str += "\n"
-        problem_str = problem_str.replace("0", "_")  # Replace 0s with spaces for empty cells
+        problem_str = problem_str.replace(
+            "0", "_"
+        )  # Replace 0s with spaces for empty cells
         return problem_str
-
 
 
 if __name__ == "__main__":
     # Example Sudoku instance
     example_sudoku: Sudoku = Sudoku(
         problem_id="sudoku-001",
+        problem_type=ProblemType.IP,
         grid=[
             [5, 3, 0, 0, 7, 0, 0, 0, 0],
             [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -67,6 +70,6 @@ if __name__ == "__main__":
             [0, 6, 0, 0, 0, 0, 2, 8, 0],
             [0, 0, 0, 4, 1, 9, 0, 0, 5],
             [0, 0, 0, 0, 8, 0, 0, 7, 9],
-        ]
+        ],
     )
     print(example_sudoku.stringify_problem())

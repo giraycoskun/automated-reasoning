@@ -8,6 +8,7 @@ types of problems in the automated reasoning system.
 from abc import ABC
 from dataclasses import dataclass, field
 from datetime import datetime
+from email.charset import BASE64
 from enum import Enum
 from typing import Optional
 
@@ -17,6 +18,7 @@ from clients.config import TIMEZONE
 class ProblemType(str, Enum):
     """Enumeration of supported problem types."""
 
+    BASE = "base"
     SEARCH = "search"
     CSP = "csp"
     SAT = "sat"

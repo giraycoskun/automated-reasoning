@@ -1,22 +1,19 @@
 """Sudoku to Integer Programming constraint mapper and models."""
 
 from dataclasses import dataclass
-import statistics
 from typing import Any, Dict, List
 
 from loguru import logger
 
-from clients.schemas.problems import Problem, ProblemName, ProblemStatus, ProblemType
+from clients.schemas.problems import ProblemName, ProblemStatus, ProblemType
 from clients.schemas.solutions import Solution
-from solver.models.ip import IPProblem
+from solver.models.base import BaseProblemModel
 
 
 @dataclass(kw_only=True)
-class SudokuProblemModel(IPProblem):
+class SudokuProblemModel(BaseProblemModel):
     """Represents a Sudoku instance that can be converted into an IP problem."""
 
-    problem: Problem
-    problem_id: str = ""
     problem_name: ProblemName = ProblemName.SUDOKU
 
     def __post_init__(self) -> None:
@@ -34,22 +31,29 @@ class SudokuProblemModel(IPProblem):
 
         # Populate required parent fields from problem instance
         self.problem_id = self.problem.problem_id
-        self.problem_name = ProblemName.SUDOKU
         self.problem_type = self.problem.problem_type
 
         # Generate IP constraints
         if self.problem.problem_type == ProblemType.IP:
             self.problem_data = sudoku_to_ip_constraints(grid)
+        elif self.problem.problem_type == ProblemType.SAT:
+            self.problem_data = sudoku_to_sat_constraints(grid)
 
         # Validate the complete model
         super().__post_init__()
 
     def write_back_solution(self, solution: Solution) -> Solution:
         """Convert IP solution back to Sudoku grid format and store in self.solution."""
+        grid = []
+        if self.problem_type == ProblemType.IP:
         # solution.solution_data is the solver result with keys: status, solution, objective_value, statistics
-        grid: List[List[int]] = ip_solution_to_sudoku_grid(
-            solution.solution_data.get("variables", {})
-        )
+            grid: List[List[int]] = ip_solution_to_sudoku_grid(
+                solution.solution_data.get("variables", {})
+            )
+        elif self.problem_type == ProblemType.SAT:
+            grid: List[List[int]] = sat_solution_to_sudoku_grid(
+                solution.solution_data.get("assignment", {})
+            )
         solution_statistics = solution.solution_data.get("statistics", {})
         solution_status = solution.solution_data.get("status", "")
         solution.solution_data = {
@@ -210,3 +214,86 @@ def ip_solution_to_sudoku_grid(
 
     def _validate_solution():
         pass
+
+
+def sudoku_to_sat_constraints(grid: List[List[int]], size: int = 9) -> Dict[str, Any]:
+    clauses = []
+
+    def var(r, c, v):
+        return 81 * r + 9 * c + v + 1
+
+    # (A) Each cell has at least one number
+    for r in range(9):
+        for c in range(9):
+            clause = [var(r, c, v) for v in range(9)]
+            clauses.append(clause)
+
+    # (B) Each cell has at most one number
+    for r in range(9):
+        for c in range(9):
+            for v1 in range(9):
+                for v2 in range(v1 + 1, 9):
+                    clauses.append([-var(r, c, v1), -var(r, c, v2)])
+
+    # (C) Rows: each number appears once per row
+    for r in range(9):
+        for v in range(9):
+            for c1 in range(9):
+                for c2 in range(c1 + 1, 9):
+                    clauses.append([-var(r, c1, v), -var(r, c2, v)])
+
+    # (D) Columns: each number appears once per column
+    for c in range(9):
+        for v in range(9):
+            for r1 in range(9):
+                for r2 in range(r1 + 1, 9):
+                    clauses.append([-var(r1, c, v), -var(r2, c, v)])
+
+    # (E) 3×3 subgrids
+    for br in range(3):
+        for bc in range(3):
+            for v in range(9):
+                cells = []
+                for r in range(br * 3, br * 3 + 3):
+                    for c in range(bc * 3, bc * 3 + 3):
+                        cells.append((r, c))
+                for i in range(len(cells)):
+                    for j in range(i + 1, len(cells)):
+                        r1, c1 = cells[i]
+                        r2, c2 = cells[j]
+                        clauses.append([-var(r1, c1, v), -var(r2, c2, v)])
+
+    # (F) Clues (given numbers)
+    for r in range(9):
+        for c in range(9):
+            if grid[r][c] != 0:
+                v = grid[r][c] - 1
+                clauses.append([var(r, c, v)])
+
+    return {"clauses": clauses}
+
+def sat_solution_to_sudoku_grid(
+    assignment: Dict[int, bool], size: int = 9
+) -> List[List[int]]:
+    """
+    Convert SAT solution back to Sudoku grid format.
+
+    Extracts values from assignment dictionary mapping variable indices to boolean values.
+
+    Args:
+        assignment: Dictionary mapping variable indices to their boolean assignments
+        size: Size of the Sudoku grid (default 9)
+    Returns:
+        2D list representing the solved Sudoku grid
+    """
+    grid = [[0 for _ in range(size)] for _ in range(size)]
+
+    for var_index, value in assignment.items():
+        if value:  # Only consider variables assigned True
+            var_index -= 1  # Adjust for 1-based indexing
+            r = var_index // 81
+            c = (var_index % 81) // 9
+            v = var_index % 9
+            grid[r][c] = v + 1  # Convert back to 1-9 range
+
+    return grid
