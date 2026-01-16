@@ -6,7 +6,7 @@ repo_name: giraycoskun/automated-reasoning
 
 theme:
   name: material
-  logo: assets/automated-reasoning-logo.svg
+  logo: assets/automated-reasoning-icon.svg
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"
@@ -84,6 +84,7 @@ nav:
       - Installation: getting-started/installation.md
       - Configuration: getting-started/configuration.md
       - Usage: getting-started/usage.md
+  - Problems: problems.md
   - API Reference:
     - API: 
       - api/app.md

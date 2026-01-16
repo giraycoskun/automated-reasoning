@@ -1,34 +1,30 @@
 # Automated Reasoning
 
-A reasoning api
+![automated-reasoning](/docs/assets/automated-reasoning.png)
+
+A distributed system for solving automated reasoning problems at scale.
+
+## Architecture
+
+![architecture](/docs/assets/automated-reasoning.drawio.png)
 
 ## Features
 
 - Monorepo
-- Dependency management via uv
+- Project Management via [uv](https://github.com/astral-sh/uv)
 - Dockerized services
-- API Gateway
+- API Gateway FastAPI service
+- Solver Worker multiprocess service
+- RabbitMQ message broker as task queue
+- Redis as data store
 
 ## Documentation
 
-## Dockerized Version
-
-## Local Development
-
-```shell
-uvicorn src.app:app --reload
-```
-
-## Serve Documentation
-```shell
-PYTHONPATH=./src uv run mkdocs serve
-```
-
-## References
+The documentation for this project can be found [here](https://giraycoskun.github.io/automated-reasoning/).
 
 ## To-Dos
 
-- Problems
+- Problem Implementations
   - [x] sudoku (puzzle)
   - [ ] hashi (puzz;e)
   - [ ] maze-cover (puzzle)
