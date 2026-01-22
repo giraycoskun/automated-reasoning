@@ -77,6 +77,7 @@ async def load_problem_redis(problem_id: str) -> Problem | None:
         return None
     return _deserialize_problem(blob)
 
+
 async def check_id_exists(problem_id: str) -> bool:
     """Check if a problem ID exists in Redis.
 
@@ -90,3 +91,54 @@ async def check_id_exists(problem_id: str) -> bool:
         raise RuntimeError("Redis is not initialized. Call init_redis() first.")
     exists = await redis.exists(problem_id)
     return exists == 1
+
+
+async def subscribe_to_problem_channel():
+    """Subscribe to a Redis channel for pub/sub.
+
+    Args:
+        channel: The channel name to subscribe to.
+    Returns:
+        PubSub: The Redis PubSub object.
+    """
+    global redis
+    channel_name = "problems"
+    if redis is None:
+        raise RuntimeError("Redis is not initialized. Call init_redis() first.")
+    pubsub = redis.pubsub()
+    try:
+        await pubsub.subscribe(channel_name)
+        logger.info(f"Subscribed to Redis channel: {channel_name}")
+    finally:
+        await pubsub.unsubscribe(channel_name)
+        await pubsub.close()
+
+    return pubsub
+
+async def receive_message(pubsub, timeout: float) -> dict | None:
+    """Receive a message from the Redis PubSub channel.
+
+    Args:
+        pubsub: The Redis PubSub object.
+    Returns:
+        dict | None: The message data or None if no message.
+    """
+    while True:
+        message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=timeout)
+        if message is None:
+            return None
+        elif message["type"] == "message":
+            return message["data"]
+        else:
+            continue
+
+async def unsunscribe_and_close_pubsub(pubsub) -> None:
+    """Unsubscribe from all channels and close the PubSub connection.
+
+    Args:
+        pubsub: The Redis PubSub object.
+    """
+    if pubsub:
+        await pubsub.unsubscribe()
+        await pubsub.close()
+        logger.info("Unsubscribed and closed PubSub connection")
