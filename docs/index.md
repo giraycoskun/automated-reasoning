@@ -1,6 +1,6 @@
 # Automated Reasoning
 
-![automated-reasoning](/assets/automated-reasoning.png)
+![automated-reasoning](assets/automated-reasoning.png)
 
 A distributed system for solving automated reasoning problems at scale.
 
@@ -16,7 +16,7 @@ A distributed system for solving automated reasoning problems at scale.
 
 ## Architecture
 
-![architecture](/assets/automated-reasoning.drawio.png)
+![architecture](assets/automated-reasoning.drawio.png)
 
 ## Documentation
 
