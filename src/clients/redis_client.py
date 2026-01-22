@@ -3,6 +3,7 @@
 
 from loguru import logger
 from redis.asyncio import Redis
+from redis.asyncio.client import PubSub
 
 from clients.util import _deserialize_problem, _serialize_problem
 from clients.config import REDIS_HOST_URL, REDIS_MAX_CONNECTIONS, REDIS_PORT
@@ -93,11 +94,9 @@ async def check_id_exists(problem_id: str) -> bool:
     return exists == 1
 
 
-async def subscribe_to_problem_channel():
+async def subscribe_to_problem_channel() -> PubSub:
     """Subscribe to a Redis channel for pub/sub.
 
-    Args:
-        channel: The channel name to subscribe to.
     Returns:
         PubSub: The Redis PubSub object.
     """
@@ -115,16 +114,21 @@ async def subscribe_to_problem_channel():
 
     return pubsub
 
+
 async def receive_message(pubsub, timeout: float) -> dict | None:
     """Receive a message from the Redis PubSub channel.
 
     Args:
-        pubsub: The Redis PubSub object.
+        pubsub (PubSub): The Redis PubSub object.
+        timeout (float): Time in seconds to wait for a message.
+
     Returns:
         dict | None: The message data or None if no message.
     """
     while True:
-        message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=timeout)
+        message = await pubsub.get_message(
+            ignore_subscribe_messages=True, timeout=timeout
+        )
         if message is None:
             return None
         elif message["type"] == "message":
@@ -132,11 +136,12 @@ async def receive_message(pubsub, timeout: float) -> dict | None:
         else:
             continue
 
+
 async def unsunscribe_and_close_pubsub(pubsub) -> None:
     """Unsubscribe from all channels and close the PubSub connection.
 
     Args:
-        pubsub: The Redis PubSub object.
+        pubsub (PubSub): The Redis PubSub object.
     """
     if pubsub:
         await pubsub.unsubscribe()
