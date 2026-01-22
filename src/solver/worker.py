@@ -9,7 +9,6 @@ from loguru import logger
 
 from clients.schemas.problems import ProblemName, ProblemStatus, ProblemType
 from clients.schemas.solutions import Solution
-from solver.models.sat import SATProblemModel
 from solver.models.sudoku import SudokuProblemModel
 from solver.services.ip import IPSolverService
 from solver.services.sat import SATSolverService

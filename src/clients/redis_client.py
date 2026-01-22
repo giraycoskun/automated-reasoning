@@ -6,7 +6,7 @@ from redis.asyncio import Redis
 from redis.asyncio.client import PubSub
 
 from clients.util import _deserialize_problem, _serialize_problem
-from clients.config import REDIS_HOST_URL, REDIS_MAX_CONNECTIONS, REDIS_PORT
+from clients.config import REDIS_HOST_URL, REDIS_MAX_CONNECTIONS, REDIS_PORT, REDIS_PROBLEMS_CHANNEL_NAME
 from clients.schemas.problems import Problem
 
 
@@ -101,15 +101,14 @@ async def subscribe_to_problem_channel() -> PubSub:
         PubSub: The Redis PubSub object.
     """
     global redis
-    channel_name = "problems"
     if redis is None:
         raise RuntimeError("Redis is not initialized. Call init_redis() first.")
     pubsub = redis.pubsub()
     try:
-        await pubsub.subscribe(channel_name)
-        logger.info(f"Subscribed to Redis channel: {channel_name}")
+        await pubsub.subscribe(REDIS_PROBLEMS_CHANNEL_NAME)
+        logger.info(f"Subscribed to Redis channel: {REDIS_PROBLEMS_CHANNEL_NAME}")
     finally:
-        await pubsub.unsubscribe(channel_name)
+        await pubsub.unsubscribe(REDIS_PROBLEMS_CHANNEL_NAME)
         await pubsub.close()
 
     return pubsub

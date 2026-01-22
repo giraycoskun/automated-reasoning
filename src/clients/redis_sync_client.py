@@ -2,11 +2,10 @@
 """Synchronous Redis client for solver workers."""
 
 import redis
-import msgpack
-from typing import Optional, Any, Dict
+from typing import Optional
 from loguru import logger
 
-from clients.config import REDIS_HOST_URL, REDIS_PORT
+from clients.config import REDIS_HOST_URL, REDIS_PORT, REDIS_PROBLEMS_CHANNEL_NAME
 from clients.schemas.solutions import Solution
 
 
@@ -69,9 +68,19 @@ def save_solution_to_redis(
             logger.warning(
                 f"Problem {solution.problem_id} not found in Redis, only solution saved"
             )
-
     except Exception as e:
         logger.error(f"Failed to save solution to Redis: {e}")
+        raise
+
+    try:
+        # Publish problem id to problems channel
+        channel_name = REDIS_PROBLEMS_CHANNEL_NAME
+        client.publish(channel_name, solution.problem_id)
+        logger.info(
+            f"Published problem ID {solution.problem_id} to channel {channel_name}"
+        )
+    except Exception as e:
+        logger.error(f"Failed to publish problem ID to Redis channel: {e}")
         raise
 
 
